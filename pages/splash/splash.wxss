@@ -1,0 +1,100 @@
+.splash-container {
+  width: 100vw;
+  height: 100vh;
+  background: #0a0a0f;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80rpx 60rpx;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.story-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.story-para {
+  margin-bottom: 28rpx;
+  opacity: 0;
+  transform: translateY(16rpx);
+  transition: all 0.5s ease;
+}
+
+.story-para.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.story-para text {
+  font-size: 30rpx;
+  line-height: 1.8;
+  display: block;
+  white-space: pre-wrap;
+}
+
+.big-text text {
+  font-size: 48rpx !important;
+  font-weight: bold;
+  letter-spacing: 8rpx;
+}
+
+.text-green { color: #00ff88; }
+.text-cyan { color: #00e5ff; }
+.text-white { color: #e0e0e0; }
+.text-red { color: #ff3366; }
+.text-dim { color: #777; }
+.text-yellow { color: #ffee00; }
+
+.glow-green {
+  text-shadow: 0 0 20rpx #00ff8866, 0 0 40rpx #00ff8833;
+}
+
+.enter-btn {
+  position: absolute;
+  bottom: 120rpx;
+  left: 0;
+  right: 0;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20rpx);
+  transition: all 0.6s ease;
+}
+
+.enter-btn.visible {
+  opacity: 1;
+  transform: translateY(0);
+  animation: enterPulse 2s ease-in-out infinite;
+}
+
+.enter-text {
+  font-size: 32rpx;
+  color: #00ff88;
+  letter-spacing: 6rpx;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 20rpx #00ff8866;
+}
+
+@keyframes enterPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.skip-btn {
+  position: absolute;
+  top: 120rpx;
+  right: 50rpx;
+  color: #444;
+  font-size: 26rpx;
+  font-family: 'Courier New', monospace;
+  opacity: 0;
+  transition: opacity 0.5s;
+  z-index: 10;
+}
+
+.skip-btn.visible {
+  opacity: 1;
+}

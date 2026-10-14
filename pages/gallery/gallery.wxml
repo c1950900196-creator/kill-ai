@@ -1,0 +1,45 @@
+<view class="page-container safe-top safe-bottom">
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="onBack">◀</view>
+    <text class="nav-title glow-cyan">崩溃画廊</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <view wx:if="{{gallery.length === 0}}" class="empty-state">
+    <text class="empty-icon">🖼</text>
+    <text class="empty-text">还没有崩溃瞬间</text>
+    <text class="empty-hint">去对战舱搞崩 AXIOM-7 吧！</text>
+  </view>
+
+  <scroll-view scroll-y class="gallery-list" wx:else>
+    <view class="gallery-card card" wx:for="{{gallery}}" wx:key="id">
+      <view class="card-header">
+        <text class="card-chaos glow-green">混沌值 {{item.chaos}}%</text>
+        <text class="card-time c-text-dim">{{item.timeStr}}</text>
+      </view>
+
+      <view class="card-highlight" wx:if="{{item.bestInput}}">
+        <text class="highlight-label c-neon-yellow">最强一击：</text>
+        <text class="highlight-text">"{{item.bestInput}}"</text>
+      </view>
+
+      <view class="card-messages">
+        <view wx:for="{{item.messages}}" wx:for-item="msg" wx:key="id" class="mini-msg">
+          <text class="mini-role {{msg.role === 'ai' ? 'c-neon-cyan' : 'c-neon-green'}}">
+            {{msg.role === 'ai' ? 'A7' : '你'}}:
+          </text>
+          <text class="mini-text">{{msg.content}}</text>
+        </view>
+      </view>
+
+      <view class="card-actions">
+        <button class="btn-secondary card-btn" bindtap="onShare" data-index="{{index}}">
+          生成海报
+        </button>
+        <button class="btn-secondary card-btn delete-btn" bindtap="onDelete" data-index="{{index}}">
+          删除
+        </button>
+      </view>
+    </view>
+  </scroll-view>
+</view>

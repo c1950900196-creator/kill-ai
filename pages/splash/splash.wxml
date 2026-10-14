@@ -1,0 +1,17 @@
+<view class="splash-container" bindtap="onTapScreen">
+  <view class="story-area">
+    <block wx:for="{{paragraphs}}" wx:key="index">
+      <view class="story-para {{item.visible ? 'visible' : ''}}">
+        <text class="{{item.class}}">{{item.text}}</text>
+      </view>
+    </block>
+  </view>
+
+  <view class="enter-btn {{showEnter ? 'visible' : ''}}">
+    <text class="enter-text">[ 点击进入 ]</text>
+  </view>
+
+  <view class="skip-btn {{showSkip ? 'visible' : ''}}" catchtap="onSkip">
+    <text>跳过 >></text>
+  </view>
+</view>

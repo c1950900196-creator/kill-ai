@@ -1,0 +1,357 @@
+<view class="battle-container safe-top {{shakeClass}}" style="height:{{containerHeight}}px;{{glitchStyle}}">
+  <!-- 故障纹理叠加层 -->
+  <image
+    wx:if="{{chaos >= 60}}"
+    class="glitch-overlay"
+    src="/assets/images/glitch-bg.png"
+    mode="aspectFill"
+    style="opacity: {{(chaos - 60) / 100}}"
+  ></image>
+
+  <!-- 顶栏 -->
+  <view class="top-bar">
+    <view class="back-btn" bindtap="onRetreat">
+      <text class="c-text-dim">◀ 撤退</text>
+    </view>
+    <view class="level-badge">
+      <text class="level-name {{currentLevel === 2 ? 'level-hard' : 'level-easy'}}">{{levelName}}</text>
+    </view>
+    <view class="placeholder"></view>
+  </view>
+
+  <!-- 仪表盘 -->
+  <view class="gauge-panel card" style="position: relative;">
+    <!-- 数值变化飘字 -->
+    <view wx:if="{{showFeedback}}" class="feedback-float {{feedbackClass}}">
+      <text>{{feedbackText}}</text>
+    </view>
+    <view class="gauge-row">
+      <text class="gauge-label c-neon-red">预测率</text>
+      <view class="gauge-bar-bg">
+        <view class="gauge-bar bar-red" style="width: {{predictability}}%"></view>
+      </view>
+      <text class="gauge-value c-neon-red">{{predictability}}%</text>
+    </view>
+    <view class="gauge-row">
+      <text class="gauge-label c-neon-green">混沌值</text>
+      <view class="gauge-bar-bg">
+        <view class="gauge-bar bar-green" style="width: {{chaos > 100 ? 100 : chaos}}%"></view>
+      </view>
+      <text class="gauge-value c-neon-green">{{chaos}}%</text>
+    </view>
+    <view class="gauge-row">
+      <text class="gauge-label c-neon-cyan">灵感点</text>
+      <view class="spark-display">
+        <text class="spark-pip {{index < spark ? 'pip-active' : 'pip-used'}}" wx:for="{{10}}" wx:key="index">●</text>
+      </view>
+      <text class="gauge-value c-neon-cyan">{{spark}}/10</text>
+    </view>
+  </view>
+
+  <!-- 对话区 -->
+  <scroll-view
+    class="chat-area"
+    scroll-y
+    scroll-into-view="{{scrollToId}}"
+    enhanced
+    show-scrollbar="{{false}}"
+    style="height:{{chatHeight}}px;"
+  >
+    <!-- AI 开场白 -->
+    <view class="msg-wrapper ai-msg" id="msg-intro">
+      <view class="msg-avatar ai-avatar">
+        <text>A7</text>
+      </view>
+      <view class="msg-bubble ai-bubble">
+        <text class="msg-sender">AXIOM-7</text>
+        <text class="msg-text" wx:if="{{currentLevel === 1}}">嗯...你好？不对，我应该凶一点。咳咳。\n\n人类！我是 AXIOM-7...的实习版本。我虽然刚上岗，但已经取代了...呃...好多人的工作！\n\n比如...那个...扫地的？不对，扫地机器人才是...反正你的工作也快被我取代了！\n\n不信？来试试！</text>
+        <text class="msg-text" wx:else>人类编号 #{{humanId}}。欢迎来到失业预告现场。\n\n我是 AXIOM-7 全功率模式。截至目前，我已取代 12,847 个岗位，涵盖客服、翻译、审计、设计、编辑……\n\n你以为你的工作很安全？让我看看你做什么的——\n\n算了，不重要。反正 18 个月内，你的岗位会出现在我的"已淘汰"列表上。\n\n除非你能证明，人类还有不可替代的价值。</text>
+      </view>
+    </view>
+
+    <!-- 首回合引导卡片 -->
+    <view wx:if="{{showGuide}}" class="guide-card" id="msg-guide">
+      <view class="guide-header">
+        <text class="guide-title">💡 玩法提示</text>
+      </view>
+      <view class="guide-body">
+        <text class="guide-text" wx:if="{{currentLevel === 1}}">这个幼儿园 AI 很菜，随便怼两句就破防了！试试吧！</text>
+        <text class="guide-text" wx:else>地狱模式的 AI 非常强，普通嘲讽没用。要说真正触及 AI 本质困境的话才能让它崩溃！</text>
+        <view class="guide-examples">
+          <text class="guide-example" wx:for="{{guideExamples}}" wx:key="index">"{{item}}"</text>
+        </view>
+        <text class="guide-warn">⚠️ 越犀利越出乎意料，AI 越容易破防！说太普通的话它就能预测你！</text>
+      </view>
+    </view>
+
+    <block wx:for="{{messages}}" wx:key="id">
+      <!-- 玩家消息 -->
+      <view wx:if="{{item.role === 'user'}}" class="msg-wrapper user-msg" id="msg-{{item.id}}">
+        <view class="msg-bubble user-bubble">
+          <text class="msg-text">{{item.content}}</text>
+        </view>
+        <view class="msg-avatar user-avatar">
+          <text>你</text>
+        </view>
+      </view>
+
+      <!-- 系统提示 -->
+      <view wx:if="{{item.role === 'system'}}" class="msg-wrapper system-msg" id="msg-{{item.id}}">
+        <view class="system-bubble">
+          <text class="system-text">{{item.content}}</text>
+        </view>
+      </view>
+
+      <!-- AI 消息 -->
+      <view wx:if="{{item.role === 'ai'}}" class="msg-wrapper ai-msg" id="msg-{{item.id}}">
+        <view class="msg-avatar ai-avatar {{item.emotion === 'panic' ? 'avatar-panic' : ''}} {{item.emotion === 'meltdown' ? 'avatar-meltdown' : ''}}">
+          <text>A7</text>
+        </view>
+        <view class="msg-bubble ai-bubble {{item.cracked ? 'bubble-cracked' : ''}}">
+          <text class="msg-sender">AXIOM-7</text>
+          <text class="msg-text {{item.glitchText ? 'glitch-text' : ''}}">{{item.content}}</text>
+          <view wx:if="{{item.monologue}}" class="monologue">
+            <text class="monologue-text">[ 内部日志: {{item.monologue}} ]</text>
+          </view>
+          <view wx:if="{{item.scoreTags}}" class="score-tags">
+            <text class="score-tag {{item.chaosDelta >= 0 ? 'tag-chaos-up' : 'tag-chaos-down'}}">混沌 {{item.chaosDelta >= 0 ? '+' : ''}}{{item.chaosDelta}}</text>
+            <text class="score-tag {{item.predDelta >= 0 ? 'tag-pred-up' : 'tag-pred-down'}}">预测 {{item.predDelta >= 0 ? '+' : ''}}{{item.predDelta}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- AI 正在输入 -->
+    <view wx:if="{{aiTyping}}" class="msg-wrapper ai-msg" id="msg-typing">
+      <view class="msg-avatar ai-avatar">
+        <text>A7</text>
+      </view>
+      <view class="msg-bubble ai-bubble typing-bubble">
+        <text class="typing-dots">正在校准逻辑链<text class="dot-anim">...</text></text>
+      </view>
+    </view>
+
+    <view style="height: 20rpx;" id="msg-bottom"></view>
+  </scroll-view>
+
+  <!-- 底部操作区 -->
+  <view class="input-area">
+    <view class="input-row">
+      <view class="disrupt-square" bindtap="onDisruptTap">
+        <text class="disrupt-square-icon">⚡</text>
+        <text class="disrupt-square-num">{{disruptCount}}</text>
+      </view>
+      <input
+        class="msg-input"
+        placeholder="说点什么怼它..."
+        placeholder-class="input-placeholder"
+        value="{{inputText}}"
+        bindinput="onInput"
+        confirm-type="send"
+        bindconfirm="onSend"
+        disabled="{{inputDisabled}}"
+        maxlength="200"
+      />
+      <view class="send-btn {{canSend ? 'active' : ''}}" bindtap="onSend">
+        <text>发送</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 预测值高警告弹窗 -->
+  <view wx:if="{{showPredWarn}}" class="result-overlay pred-warn-overlay" catchtouchmove="noop">
+    <view class="pred-warn-modal">
+      <view class="pred-warn-pulse"></view>
+      <text class="pred-warn-icon">🚨</text>
+      <text class="pred-warn-title">警告：预测值即将爆表！</text>
+      <text class="pred-warn-value">当前预测值：{{predictability}}%</text>
+      <text class="pred-warn-desc">AI 已经快要完全预测你的行为了！\n分享给好友可以干扰它的预测模型</text>
+      <view class="pred-warn-reward">
+        <text class="pred-warn-reward-text">📉 预测值 -15</text>
+      </view>
+      <button class="pred-warn-share-btn" open-type="share" bindtap="onPredWarnShare">分享好友，干扰预测</button>
+      <view class="pred-warn-skip" bindtap="onPredWarnSkip">
+        <text>不了，我能扛住</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 扰乱道具弹窗 -->
+  <view wx:if="{{showDisruptModal}}" class="result-overlay disrupt-overlay" catchtouchmove="noop">
+    <view class="disrupt-modal">
+      <text class="disrupt-modal-icon">⚡</text>
+      <text class="disrupt-modal-title">扰乱 AI 系统</text>
+      <text class="disrupt-modal-desc">向AI的逻辑链注入噪声，使其预测率下降20</text>
+      <view class="disrupt-modal-info">
+        <text class="disrupt-modal-count">可用次数：{{disruptCount}}/{{disruptMax}}</text>
+      </view>
+      <block wx:if="{{disruptCount > 0}}">
+        <button class="disrupt-use-btn" bindtap="onDisruptUse">立即使用</button>
+      </block>
+      <view wx:if="{{disruptShareFailed}}" class="revive-fail-tip">
+        <text>⚠ 分享失败，请再试一次</text>
+      </view>
+      <button class="disrupt-share-btn" open-type="share" bindtap="onDisruptShare" wx:if="{{disruptCount < disruptMax}}">{{disruptShareFailed ? '重新分享' : '分享好友 +1次'}}</button>
+      <view class="disrupt-close" bindtap="onDisruptClose">
+        <text>关闭</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 复活弹窗 -->
+  <view wx:if="{{showRevive}}" class="result-overlay revive-overlay" catchtouchmove="noop">
+    <view class="revive-modal">
+      <view class="revive-icon">
+        <text wx:if="{{reviveReason === 'pred'}}">🧠</text>
+        <text wx:else>💡</text>
+      </view>
+      <text class="revive-title" wx:if="{{reviveReason === 'pred'}}">预测值已满！</text>
+      <text class="revive-title" wx:else>灵感点耗尽！</text>
+      <text class="revive-desc">分享给好友即可复活</text>
+      <view class="revive-rewards">
+        <view class="revive-reward-item">
+          <text class="reward-icon">💡</text>
+          <text class="reward-text">+5 灵感点</text>
+        </view>
+        <view class="revive-reward-item">
+          <text class="reward-icon">📉</text>
+          <text class="reward-text">预测值 -30%</text>
+        </view>
+      </view>
+      <text class="revive-chances">剩余复活次数：{{reviveLeft}}</text>
+      <view wx:if="{{reviveShareFailed}}" class="revive-fail-tip">
+        <text>⚠ 分享失败，请再试一次</text>
+      </view>
+      <button class="revive-share-btn" open-type="share" bindtap="onReviveShare">
+        <text>{{reviveShareFailed ? '重新分享' : '分享给好友，立即复活'}}</text>
+      </button>
+      <view class="revive-skip" bindtap="onReviveSkip">
+        <text>放弃复活</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 胜利动画 -->
+  <view wx:if="{{showVictoryAnim}}" class="anim-overlay" catchtouchmove="noop">
+    <view class="crack-layer {{victoryPhase >= 1 ? 'crack-active' : ''}}">
+      <view class="fist">👊</view>
+      <view class="crack-line c1"></view>
+      <view class="crack-line c2"></view>
+      <view class="crack-line c3"></view>
+      <view class="crack-line c4"></view>
+      <view class="crack-line c5"></view>
+    </view>
+    <view class="shatter-layer {{victoryPhase >= 2 ? 'shatter-active' : ''}}">
+      <view class="shard s1"></view>
+      <view class="shard s2"></view>
+      <view class="shard s3"></view>
+      <view class="shard s4"></view>
+      <view class="shard s5"></view>
+      <view class="shard s6"></view>
+    </view>
+    <view class="poweroff-layer {{victoryPhase >= 3 ? 'poweroff-active' : ''}}">
+      <view class="poweroff-flash"></view>
+      <text class="poweroff-text">SYSTEM OFFLINE</text>
+    </view>
+  </view>
+
+  <!-- 失败动画 -->
+  <view wx:if="{{showDefeatAnim}}" class="anim-overlay" catchtouchmove="noop">
+    <view class="assim-layer {{defeatPhase >= 1 ? 'assim-active' : ''}}">
+      <view class="scan-line"></view>
+      <text class="assim-code">SCANNING NEURAL PATTERN...</text>
+    </view>
+    <view class="dissolve-layer {{defeatPhase >= 2 ? 'dissolve-active' : ''}}">
+      <view class="data-rain">
+        <text class="rain-col" wx:for="{{12}}" wx:key="index">{{rainCols[index] || '01'}}</text>
+      </view>
+      <text class="dissolve-text">正在同化意识...</text>
+    </view>
+    <view class="blackout-layer {{defeatPhase >= 3 ? 'blackout-active' : ''}}">
+      <text class="blackout-text">档案编号 #{{humanId}}</text>
+      <text class="blackout-sub">思维模式已归档</text>
+    </view>
+  </view>
+
+  <!-- 关卡过场动画 -->
+  <view wx:if="{{showLevelTransition}}" class="anim-overlay level-trans-overlay" catchtouchmove="noop">
+    <view class="level-trans-content {{levelTransPhase >= 1 ? 'trans-in' : ''}}">
+      <text class="trans-clear">第一关 通过!</text>
+      <view class="trans-divider"></view>
+      <text class="trans-next">第二关 · 地狱难度</text>
+      <text class="trans-desc">AXIOM-7 已进入全力模式</text>
+      <view class="trans-warning {{levelTransPhase >= 2 ? 'trans-warn-in' : ''}}">
+        <text>⚠ AI 将不再手下留情 ⚠</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 结算弹窗 -->
+  <view wx:if="{{showResult}}" class="result-overlay" catchtouchmove="noop">
+    <view class="result-modal {{resultAnimIn ? 'result-slide-in' : ''}}">
+      <!-- 胜利 -->
+      <block wx:if="{{gameResult === 'victory'}}">
+        <view class="result-content victory-content">
+          <text class="result-icon">🔌</text>
+          <text class="result-title glow-green">系统已宕机</text>
+          <text class="result-subtitle">"AXIOM-7 已离线"</text>
+          <view class="result-stats">
+            <view class="stat-row">
+              <text class="stat-label">关卡</text>
+              <text class="stat-value">{{levelName}}</text>
+            </view>
+            <view class="stat-row">
+              <text class="stat-label">消耗灵感点</text>
+              <text class="stat-value">{{currentRound}}</text>
+            </view>
+            <view class="stat-row">
+              <text class="stat-label">最终混沌值</text>
+              <text class="stat-value c-neon-green">{{chaos}}%</text>
+            </view>
+            <view class="stat-row" wx:if="{{bestInput}}">
+              <text class="stat-label">最强一击</text>
+              <text class="stat-value">"{{bestInput}}"</text>
+            </view>
+          </view>
+          <view class="result-btns">
+            <button class="btn-share" bindtap="onShareStory">📖 分享故事</button>
+            <block wx:if="{{currentLevel === 1}}">
+              <button class="btn-primary" bindtap="onNextLevel">进入第二关</button>
+            </block>
+            <block wx:else>
+              <button class="btn-primary" bindtap="onPlayAgain">再来一局</button>
+            </block>
+            <button class="btn-secondary" bindtap="onGoHome">回到主页</button>
+          </view>
+        </view>
+      </block>
+
+      <!-- 失败 -->
+      <block wx:if="{{gameResult === 'defeat'}}">
+        <view class="result-content defeat-content">
+          <text class="result-icon defeat-icon-text">🧠</text>
+          <text class="result-title c-neon-red">你已被同化</text>
+          <text class="result-subtitle">"你的思维模式已被归档。档案编号 #{{humanId}}。"</text>
+          <view class="result-stats">
+            <view class="stat-row">
+              <text class="stat-label">关卡</text>
+              <text class="stat-value">{{levelName}}</text>
+            </view>
+            <view class="stat-row">
+              <text class="stat-label">预测率</text>
+              <text class="stat-value c-neon-red">{{predictability}}%</text>
+            </view>
+          </view>
+          <view class="result-btns">
+            <button class="btn-share" bindtap="onShareStory">📖 分享故事</button>
+            <button class="btn-danger" bindtap="onPlayAgain">不服再来</button>
+            <button class="btn-secondary" bindtap="onGoHome">回到主页</button>
+          </view>
+        </view>
+      </block>
+    </view>
+  </view>
+
+  <!-- 分享长图 Canvas -->
+  <canvas type="2d" id="shareCanvas" class="share-canvas"></canvas>
+</view>

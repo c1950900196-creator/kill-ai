@@ -1,0 +1,269 @@
+.home-container {
+  min-height: 100vh;
+  background: #0a0a0f;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 40rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-scanlines {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2rpx,
+    rgba(0, 255, 136, 0.015) 2rpx,
+    rgba(0, 255, 136, 0.015) 4rpx
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Logo 区 */
+.logo-section {
+  margin-top: 120rpx;
+  text-align: center;
+  z-index: 2;
+}
+
+.logo {
+  width: 480rpx;
+  height: 240rpx;
+}
+
+.subtitle {
+  margin-top: 16rpx;
+}
+
+.subtitle-text {
+  font-size: 24rpx;
+  color: #00ff8899;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2rpx;
+}
+
+/* 服务器区 */
+.server-section {
+  margin-top: 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.server-img {
+  width: 300rpx;
+  height: 360rpx;
+}
+
+.server-status {
+  display: flex;
+  align-items: center;
+  margin-top: 16rpx;
+}
+
+.status-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #00ff88;
+  margin-right: 12rpx;
+  box-shadow: 0 0 8rpx #00ff88;
+}
+
+.status-text {
+  font-size: 22rpx;
+  color: #00ff88;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 4rpx;
+}
+
+.global-count {
+  margin-top: 20rpx;
+  text-align: center;
+}
+
+.count-label {
+  font-size: 22rpx;
+  color: #666;
+  display: block;
+}
+
+.count-number {
+  font-size: 48rpx;
+  color: #00e5ff;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  display: block;
+  margin-top: 8rpx;
+}
+
+/* 按钮区 */
+.btn-section {
+  margin-top: 48rpx;
+  width: 100%;
+  z-index: 2;
+}
+
+.main-btn {
+  width: 100%;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  border-radius: 16rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 0 30rpx rgba(0, 255, 136, 0.3);
+  animation: mainPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes mainPulse {
+  0%, 100% { box-shadow: 0 0 20rpx rgba(0, 255, 136, 0.2); }
+  50% { box-shadow: 0 0 40rpx rgba(0, 255, 136, 0.5); }
+}
+
+.btn-icon {
+  margin-right: 12rpx;
+  font-size: 36rpx;
+}
+
+.sub-btn-row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.sub-btn {
+  flex: 1;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+}
+
+.btn-icon-sm {
+  margin-right: 8rpx;
+  font-size: 28rpx;
+}
+
+/* 底部 */
+.footer {
+  position: absolute;
+  bottom: 60rpx;
+  z-index: 2;
+}
+
+.version {
+  font-size: 20rpx;
+  color: #333;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2rpx;
+}
+
+/* 授权弹窗 */
+.auth-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 10, 15, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.auth-modal {
+  width: 600rpx;
+  background: #12121e;
+  border: 1rpx solid #2a2a3e;
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-title {
+  font-size: 36rpx;
+  color: #00e5ff;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  margin-bottom: 12rpx;
+}
+
+.auth-desc {
+  font-size: 24rpx;
+  color: #666;
+  margin-bottom: 40rpx;
+}
+
+.auth-avatar-btn {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: #1a1a2e;
+  border: 2rpx dashed #00e5ff44;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30rpx;
+  padding: 0;
+  overflow: hidden;
+}
+
+.auth-avatar-img {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+}
+
+.auth-avatar-placeholder {
+  font-size: 22rpx;
+  color: #555;
+  text-align: center;
+}
+
+.auth-nickname-input {
+  width: 100%;
+  height: 80rpx;
+  background: #1a1a2e;
+  border: 1rpx solid #2a2a3e;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  color: #e0e0e0;
+  font-size: 28rpx;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.auth-input-placeholder {
+  color: #555;
+}
+
+.auth-confirm-btn {
+  width: 100%;
+  height: 80rpx;
+  background: linear-gradient(135deg, #00e5ff, #00ff88);
+  color: #0a0a0f;
+  font-size: 30rpx;
+  font-weight: bold;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+}
+
+.auth-skip {
+  padding: 16rpx;
+}
+
+.auth-skip text {
+  font-size: 24rpx;
+  color: #555;
+}

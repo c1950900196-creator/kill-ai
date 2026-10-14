@@ -1,0 +1,107 @@
+/* ===== 干掉AI 全局主题变量 ===== */
+
+/* 使用 CSS 变量无法在小程序中用，这里用 class 和常量方案 */
+
+/* 主色调 */
+.c-neon-green { color: #00ff88; }
+.c-neon-cyan { color: #00e5ff; }
+.c-neon-magenta { color: #ff00ff; }
+.c-neon-red { color: #ff3366; }
+.c-neon-yellow { color: #ffee00; }
+.c-text { color: #e0e0e0; }
+.c-text-dim { color: #666; }
+.c-text-bright { color: #fff; }
+
+.bg-dark { background-color: #0a0a0f; }
+.bg-card { background-color: #12121a; }
+.bg-input { background-color: #1a1a2e; }
+
+/* 通用按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, #00ff88, #00cc66);
+  color: #0a0a0f;
+  border: none;
+  border-radius: 12rpx;
+  padding: 24rpx 48rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2rpx;
+}
+
+.btn-primary::after { border: none; }
+
+.btn-secondary {
+  background: transparent;
+  color: #00ff88;
+  border: 2rpx solid #00ff8844;
+  border-radius: 12rpx;
+  padding: 20rpx 40rpx;
+  font-size: 28rpx;
+  font-family: 'Courier New', monospace;
+}
+
+.btn-secondary::after { border: none; }
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff3366, #cc0044);
+  color: #fff;
+  border: none;
+  border-radius: 12rpx;
+  padding: 24rpx 48rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+}
+
+.btn-danger::after { border: none; }
+
+/* 卡片 */
+.card {
+  background: #12121a;
+  border: 1rpx solid #1e1e2e;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin: 16rpx 0;
+}
+
+/* 发光效果 */
+.glow-green {
+  text-shadow: 0 0 10rpx #00ff88, 0 0 20rpx #00ff8866;
+}
+
+.glow-cyan {
+  text-shadow: 0 0 10rpx #00e5ff, 0 0 20rpx #00e5ff66;
+}
+
+.glow-red {
+  text-shadow: 0 0 10rpx #ff3366, 0 0 20rpx #ff336666;
+}
+
+/* 脉冲动画 */
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* 扫描线效果 */
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2rpx,
+    rgba(0, 255, 136, 0.03) 2rpx,
+    rgba(0, 255, 136, 0.03) 4rpx
+  );
+  pointer-events: none;
+}

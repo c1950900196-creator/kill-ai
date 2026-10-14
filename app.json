@@ -1,0 +1,22 @@
+{
+  "pages": [
+    "pages/splash/splash",
+    "pages/home/home",
+    "pages/battle/battle",
+    "pages/gallery/gallery",
+    "pages/achievements/achievements",
+    "pages/ranking/ranking",
+    "pages/settings/settings"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#0a0a0f",
+    "navigationBarTitleText": "决战AI",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0a0a0f",
+    "navigationStyle": "custom"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

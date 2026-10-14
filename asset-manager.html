@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>干掉AI - 素材管理器</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0f; color: #e0e0e0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+
+  .header { padding: 32px 40px; border-bottom: 1px solid #1e1e2e; }
+  .header h1 { font-size: 24px; color: #00ff88; font-family: 'Courier New', monospace; }
+  .header p { color: #666; font-size: 14px; margin-top: 8px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; padding: 32px 40px; }
+
+  .card {
+    background: #12121a;
+    border: 1px solid #1e1e2e;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: #00e5ff44; }
+  .card.drag-over { border-color: #00ff88; border-style: dashed; background: #00ff8808; }
+
+  .card-preview {
+    width: 100%;
+    height: 200px;
+    background: #080810;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .card-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .card-preview .no-img {
+    color: #333;
+    font-size: 48px;
+  }
+  .card-preview .drop-hint {
+    position: absolute;
+    inset: 0;
+    background: #00ff8815;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00ff88;
+    font-size: 16px;
+    font-weight: bold;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .card.drag-over .drop-hint { opacity: 1; }
+
+  .card-info { padding: 16px 20px; }
+  .card-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 8px;
+    font-family: 'Courier New', monospace;
+  }
+  .card-path {
+    font-size: 12px;
+    color: #00e5ff;
+    font-family: 'Courier New', monospace;
+    background: #00e5ff11;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 8px;
+    word-break: break-all;
+  }
+  .card-usage {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+  }
+  .card-usage .file-ref {
+    color: #ffee00;
+    font-family: 'Courier New', monospace;
+  }
+  .card-size {
+    font-size: 12px;
+    color: #555;
+  }
+  .card-size .warn { color: #ff3366; }
+
+  .card-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-replace {
+    background: #00e5ff22;
+    color: #00e5ff;
+    border: 1px solid #00e5ff44;
+  }
+  .btn-replace:hover { background: #00e5ff33; }
+  .btn-open {
+    background: #ffffff11;
+    color: #aaa;
+    border: 1px solid #333;
+  }
+  .btn-open:hover { background: #ffffff22; }
+
+  .status {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #00ff88;
+    color: #0a0a0f;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100;
+  }
+  .status.show { opacity: 1; }
+
+  .section-title {
+    padding: 0 40px;
+    margin-top: 32px;
+    font-size: 18px;
+    color: #888;
+    font-family: 'Courier New', monospace;
+  }
+  .section-title span { color: #00e5ff; }
+
+  input[type="file"] { display: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>> 素材管理器</h1>
+  <p>查看项目中所有图片素材的位置和引用情况 | 拖拽图片到卡片上可直接替换 | 点击「选择文件」也可替换</p>
+</div>
+
+<div class="section-title">正在使用的素材 (<span id="usedCount">0</span>)</div>
+<div class="grid" id="usedGrid"></div>
+
+<div class="section-title">未被引用的素材 (<span id="unusedCount">0</span>)</div>
+<div class="grid" id="unusedGrid"></div>
+
+<div class="section-title">缺失的素材 (<span id="missingCount">0</span>)</div>
+<div class="grid" id="missingGrid"></div>
+
+<div class="status" id="status"></div>
+
+<script>
+const PROJECT_ROOT = '/path/to/kill-ai';
+
+const ALL_ASSETS = [
+  {
+    name: 'logo.png',
+    path: 'assets/images/logo.png',
+    desc: '游戏 Logo',
+    spec: '400x200px, PNG透明背景',
+    usage: [{ file: 'pages/home/home.wxml', line: 7 }],
+    size: '1.6MB'
+  },
+  {
+    name: 'server-rack.png',
+    path: 'assets/images/server-rack.png',
+    desc: 'AI 服务器机柜插图',
+    spec: '300x500px, PNG',
+    usage: [{ file: 'pages/home/home.wxml', line: 15 }],
+    size: '1.4MB'
+  },
+  {
+    name: 'glitch-bg.png',
+    path: 'assets/images/glitch-bg.png',
+    desc: '故障艺术纹理（崩坏状态背景）',
+    spec: '750x1334px, PNG',
+    usage: [{ file: 'pages/battle/battle.wxml', line: 6 }],
+    size: '2.0MB'
+  },
+  {
+    name: 'victory-bg.png',
+    path: 'assets/images/victory-bg.png',
+    desc: '胜利结算背景图',
+    spec: '750x600px',
+    usage: [],
+    size: '1.9MB'
+  },
+  {
+    name: 'defeat-icon.png',
+    path: 'assets/images/defeat-icon.png',
+    desc: '失败结算 AI 图标',
+    spec: '300x300px, PNG透明',
+    usage: [],
+    size: '1.6MB'
+  },
+  {
+    name: 'poster-bg.png',
+    path: 'assets/images/poster-bg.png',
+    desc: '分享海报背景模板',
+    spec: '750x1334px',
+    usage: [],
+    size: '1.8MB'
+  }
+];
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function showStatus(msg) {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function createCard(asset) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.path = asset.path;
+
+  const fullPath = `${PROJECT_ROOT}/${asset.path}`;
+  const hasUsage = asset.usage && asset.usage.length > 0;
+  const sizeWarn = asset.size && parseFloat(asset.size) > 1;
+
+  const usageHtml = hasUsage
+    ? asset.usage.map(u => `引用于 <span class="file-ref">${u.file}:${u.line}</span>`).join('<br>')
+    : '<span style="color:#ff336688">未在代码中引用</span>';
+
+  card.innerHTML = `
+    <div class="card-preview" title="点击预览大图">
+      <img src="file://${fullPath}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+      <div class="no-img" style="display:none">?</div>
+      <div class="drop-hint">松手替换</div>
+    </div>
+    <div class="card-info">
+      <div class="card-name">${asset.name}</div>
+      <div class="card-path">${asset.path}</div>
+      <div style="font-size:13px; color:#aaa; margin-bottom:8px">${asset.desc}</div>
+      <div style="font-size:12px; color:#666; margin-bottom:8px">建议规格：${asset.spec}</div>
+      <div class="card-usage">${usageHtml}</div>
+      <div class="card-size">
+        文件大小：${asset.size || '未知'}
+        ${sizeWarn ? '<span class="warn"> ⚠ 偏大，建议压缩</span>' : ''}
+      </div>
+      <div class="card-actions">
+        <label class="btn btn-replace">
+          选择文件替换
+          <input type="file" accept="image/*" onchange="handleFileReplace(this, '${asset.path}')" />
+        </label>
+      </div>
+    </div>
+  `;
+
+  card.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    card.classList.add('drag-over');
+  });
+  card.addEventListener('dragleave', () => {
+    card.classList.remove('drag-over');
+  });
+  card.addEventListener('drop', (e) => {
+    e.preventDefault();
+    card.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      replaceAsset(file, asset.path, card);
+    }
+  });
+
+  return card;
+}
+
+async function handleFileReplace(input, assetPath) {
+  const file = input.files[0];
+  if (!file) return;
+  const card = input.closest('.card');
+  await replaceAsset(file, assetPath, card);
+  input.value = '';
+}
+
+async function replaceAsset(file, assetPath, card) {
+  const fullPath = `${PROJECT_ROOT}/${assetPath}`;
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: file.type });
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = card.querySelector('.card-preview img');
+      const noImg = card.querySelector('.no-img');
+      if (img) {
+        img.src = reader.result;
+        img.style.display = '';
+      }
+      if (noImg) noImg.style.display = 'none';
+
+      const sizeEl = card.querySelector('.card-size');
+      if (sizeEl) sizeEl.innerHTML = `文件大小：${formatSize(file.size)}${file.size > 500 * 1024 ? ' <span class="warn">⚠ 偏大</span>' : ''}`;
+    };
+    reader.readAsDataURL(file);
+
+    showStatus(`请手动将文件复制到: ${fullPath}`);
+
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = assetPath.split('/').pop();
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showStatus(`✓ 已下载 ${assetPath.split('/').pop()}，请替换到项目对应位置`);
+  } catch (err) {
+    showStatus('替换失败: ' + err.message);
+  }
+}
+
+function init() {
+  const usedGrid = document.getElementById('usedGrid');
+  const unusedGrid = document.getElementById('unusedGrid');
+
+  const used = ALL_ASSETS.filter(a => a.usage && a.usage.length > 0);
+  const unused = ALL_ASSETS.filter(a => !a.usage || a.usage.length === 0);
+
+  document.getElementById('usedCount').textContent = used.length;
+  document.getElementById('unusedCount').textContent = unused.length;
+  document.getElementById('missingCount').textContent = '0';
+
+  used.forEach(a => usedGrid.appendChild(createCard(a)));
+  unused.forEach(a => unusedGrid.appendChild(createCard(a)));
+}
+
+init();
+</script>
+</body>
+</html>

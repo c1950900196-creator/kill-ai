@@ -1,0 +1,69 @@
+<view class="page-container safe-top safe-bottom">
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="onBack">◀</view>
+    <text class="nav-title glow-cyan">排行榜</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <view class="rank-notice">
+    <text class="rank-notice-text">仅记录「地狱难度」通关成绩</text>
+  </view>
+
+  <!-- 榜单类型切换 -->
+  <view class="tab-bar">
+    <view
+      class="tab-item {{currentTab === 'speed' ? 'active' : ''}}"
+      bindtap="onSwitchTab"
+      data-tab="speed"
+    >
+      <text>最速崩溃</text>
+    </view>
+    <view
+      class="tab-item {{currentTab === 'chaos' ? 'active' : ''}}"
+      bindtap="onSwitchTab"
+      data-tab="chaos"
+    >
+      <text>混沌大师</text>
+    </view>
+    <view
+      class="tab-item {{currentTab === 'total' ? 'active' : ''}}"
+      bindtap="onSwitchTab"
+      data-tab="total"
+    >
+      <text>累计拔线</text>
+    </view>
+  </view>
+
+  <!-- 我的排名 -->
+  <view class="my-rank card" wx:if="{{myRank}}">
+    <text class="my-rank-label">我的排名</text>
+    <text class="my-rank-num c-neon-green">#{{myRank.rank}}</text>
+    <text class="my-rank-score">{{myRank.scoreText}}</text>
+  </view>
+
+  <!-- 排行列表 -->
+  <scroll-view scroll-y class="rank-list">
+    <view wx:if="{{rankList.length === 0}}" class="empty-state">
+      <text class="empty-text">暂无数据</text>
+      <text class="empty-hint">去对战舱创造记录吧！</text>
+    </view>
+
+    <view
+      class="rank-item {{index < 3 ? 'top-three' : ''}}"
+      wx:for="{{rankList}}"
+      wx:key="index"
+    >
+      <view class="rank-pos">
+        <text wx:if="{{index === 0}}" class="rank-medal">🥇</text>
+        <text wx:elif="{{index === 1}}" class="rank-medal">🥈</text>
+        <text wx:elif="{{index === 2}}" class="rank-medal">🥉</text>
+        <text wx:else class="rank-num c-text-dim">{{index + 1}}</text>
+      </view>
+      <view class="rank-info">
+        <text class="rank-name">{{item.name}}</text>
+        <text class="rank-time c-text-dim">{{item.timeStr}}</text>
+      </view>
+      <text class="rank-score {{index < 3 ? 'c-neon-green' : ''}}">{{item.scoreText}}</text>
+    </view>
+  </scroll-view>
+</view>

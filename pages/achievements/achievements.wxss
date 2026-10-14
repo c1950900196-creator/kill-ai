@@ -1,0 +1,85 @@
+.page-container {
+  min-height: 100vh;
+  background: #0a0a0f;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 100rpx 32rpx 24rpx;
+}
+
+.nav-back { color: #666; font-size: 32rpx; padding: 12rpx 20rpx; }
+.nav-title { font-size: 34rpx; font-family: 'Courier New', monospace; letter-spacing: 4rpx; }
+.nav-placeholder { width: 80rpx; }
+
+.stats-bar {
+  padding: 0 40rpx 24rpx;
+}
+
+.stats-text {
+  font-size: 24rpx;
+  color: #666;
+  font-family: 'Courier New', monospace;
+}
+
+.achievement-list {
+  flex: 1;
+  padding: 0 24rpx 40rpx;
+}
+
+.achievement-card {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding: 24rpx;
+}
+
+.achievement-card.locked {
+  opacity: 0.5;
+}
+
+.ach-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 16rpx;
+  background: #1a1a2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.ach-icon-wrap.unlocked {
+  background: #0a2a1a;
+  border: 1rpx solid #00ff8844;
+}
+
+.ach-icon { font-size: 40rpx; }
+
+.ach-info { flex: 1; }
+
+.ach-name {
+  font-size: 28rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6rpx;
+  font-family: 'Courier New', monospace;
+}
+
+.ach-desc {
+  font-size: 22rpx;
+  color: #888;
+  display: block;
+}
+
+.ach-check {
+  color: #00ff88;
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-left: 16rpx;
+}

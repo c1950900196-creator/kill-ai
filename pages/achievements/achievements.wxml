@@ -1,0 +1,28 @@
+<view class="page-container safe-top safe-bottom">
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="onBack">◀</view>
+    <text class="nav-title glow-cyan">成就勋章</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <view class="stats-bar">
+    <text class="stats-text">已解锁 {{unlockedCount}}/{{achievements.length}}</text>
+  </view>
+
+  <scroll-view scroll-y class="achievement-list">
+    <view
+      class="achievement-card card {{item.unlocked ? '' : 'locked'}}"
+      wx:for="{{achievements}}"
+      wx:key="id"
+    >
+      <view class="ach-icon-wrap {{item.unlocked ? 'unlocked' : ''}}">
+        <text class="ach-icon">{{item.icon}}</text>
+      </view>
+      <view class="ach-info">
+        <text class="ach-name {{item.unlocked ? 'c-neon-green' : 'c-text-dim'}}">{{item.name}}</text>
+        <text class="ach-desc">{{item.unlocked ? item.desc : item.hint}}</text>
+      </view>
+      <view wx:if="{{item.unlocked}}" class="ach-check">✓</view>
+    </view>
+  </scroll-view>
+</view>

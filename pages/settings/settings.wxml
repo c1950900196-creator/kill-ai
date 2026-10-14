@@ -1,0 +1,100 @@
+<view class="page-container safe-top safe-bottom">
+  <view class="nav-bar">
+    <view class="nav-back" bindtap="onBack">◀</view>
+    <text class="nav-title glow-cyan">设置</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <view class="settings-list">
+    <!-- 音效 -->
+    <view class="setting-item card">
+      <view class="setting-info">
+        <text class="setting-icon">🔊</text>
+        <text class="setting-name">音效</text>
+      </view>
+      <switch
+        checked="{{soundEnabled}}"
+        bindchange="onSoundToggle"
+        color="#00ff88"
+      />
+    </view>
+
+    <!-- 震动 -->
+    <view class="setting-item card">
+      <view class="setting-info">
+        <text class="setting-icon">📳</text>
+        <text class="setting-name">震动反馈</text>
+      </view>
+      <switch
+        checked="{{vibrationEnabled}}"
+        bindchange="onVibrationToggle"
+        color="#00ff88"
+      />
+    </view>
+
+    <!-- 清除数据 -->
+    <view class="setting-item card" bindtap="onClearData">
+      <view class="setting-info">
+        <text class="setting-icon">🗑</text>
+        <text class="setting-name c-neon-red">清除所有数据</text>
+      </view>
+      <text class="setting-arrow c-text-dim">></text>
+    </view>
+  </view>
+
+  <!-- 分享配置 -->
+  <view class="share-config-section">
+    <text class="section-title">📤 分享配置</text>
+
+    <view class="share-texts card">
+      <text class="share-label">分享文案（随机选一条）</text>
+      <view class="share-text-list">
+        <view class="share-text-item" wx:for="{{shareTexts}}" wx:key="index">
+          <input
+            class="share-text-input"
+            value="{{item}}"
+            data-index="{{index}}"
+            bindinput="onShareTextInput"
+            placeholder="输入分享文案..."
+            placeholder-class="input-placeholder"
+            maxlength="30"
+          />
+          <view class="share-text-del" bindtap="onShareTextDel" data-index="{{index}}" wx:if="{{shareTexts.length > 1}}">
+            <text>✕</text>
+          </view>
+        </view>
+      </view>
+      <view class="share-text-add" bindtap="onShareTextAdd" wx:if="{{shareTexts.length < 10}}">
+        <text>+ 添加一条</text>
+      </view>
+    </view>
+
+    <view class="share-image card">
+      <text class="share-label">分享封面图（5:4 比例，建议 500x400）</text>
+      <view class="share-image-preview" bindtap="onChooseShareImage">
+        <image wx:if="{{shareImage}}" src="{{shareImage}}" mode="aspectFit" class="share-img"></image>
+        <view wx:else class="share-img-placeholder">
+          <text>点击选择图片</text>
+        </view>
+      </view>
+      <view wx:if="{{shareImage}}" class="share-image-clear" bindtap="onClearShareImage">
+        <text>清除图片（使用默认截图）</text>
+      </view>
+    </view>
+
+    <button class="share-save-btn" bindtap="onSaveShareConfig">保存分享配置</button>
+  </view>
+
+  <!-- 关于 -->
+  <view class="about-section">
+    <view class="about-card card">
+      <text class="about-title glow-green">决战AI</text>
+      <text class="about-ver">v1.0.0</text>
+      <text class="about-desc">怼到超级 AI 破防求饶。</text>
+      <text class="about-desc">用你的嘴，证明人类不可取代。</text>
+      <view class="about-divider"></view>
+      <text class="about-copy c-text-dim">AXIOM-7 RESISTANCE PROTOCOL</text>
+      <text class="about-copy c-text-dim">© 2026 Human Creativity Labs</text>
+    </view>
+  </view>
+</view>

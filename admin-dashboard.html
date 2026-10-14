@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>决战AI · 管理后台</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+
+  .header { background: #12121e; border-bottom: 1px solid #2a2a3e; padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; }
+  .header h1 { font-size: 20px; color: #00e5ff; font-family: 'Courier New', monospace; }
+  .header .status { font-size: 13px; padding: 4px 12px; border-radius: 12px; }
+  .status-ok { background: rgba(0,255,136,0.15); color: #00ff88; }
+  .status-err { background: rgba(255,51,102,0.15); color: #ff3366; }
+
+  .config-bar { background: #12121e; border-bottom: 1px solid #1e1e2e; padding: 16px 30px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .config-bar label { font-size: 13px; color: #888; }
+  .config-bar input { background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 6px; padding: 8px 14px; color: #e0e0e0; font-size: 13px; flex: 1; min-width: 300px; }
+  .config-bar button { background: #00e5ff; color: #0a0a0f; border: none; border-radius: 6px; padding: 8px 20px; font-size: 13px; font-weight: bold; cursor: pointer; }
+  .config-bar button:hover { background: #00ccdd; }
+
+  .container { max-width: 1200px; margin: 0 auto; padding: 24px 30px; }
+
+  .breadcrumb { font-size: 13px; color: #666; margin-bottom: 20px; }
+  .breadcrumb a { color: #00e5ff; text-decoration: none; cursor: pointer; }
+  .breadcrumb a:hover { text-decoration: underline; }
+
+  .stats { display: flex; gap: 16px; margin-bottom: 24px; }
+  .stat-card { flex: 1; background: #12121e; border: 1px solid #2a2a3e; border-radius: 12px; padding: 24px; text-align: center; }
+  .stat-num { font-size: 36px; color: #00e5ff; font-weight: bold; font-family: 'Courier New', monospace; }
+  .stat-label { font-size: 13px; color: #666; margin-top: 6px; }
+
+  .section-title { font-size: 16px; font-weight: bold; margin-bottom: 16px; color: #e0e0e0; }
+
+  .user-list { display: flex; flex-direction: column; gap: 10px; }
+  .user-item { display: flex; align-items: center; background: #12121e; border: 1px solid #1e1e2e; border-radius: 10px; padding: 16px 20px; cursor: pointer; transition: border-color 0.2s; }
+  .user-item:hover { border-color: #00e5ff44; }
+  .user-avatar { width: 44px; height: 44px; border-radius: 50%; margin-right: 16px; background: #1a1a2e; object-fit: cover; flex-shrink: 0; }
+  .user-avatar-ph { width: 44px; height: 44px; border-radius: 50%; margin-right: 16px; background: #1a1a2e; display: flex; align-items: center; justify-content: center; color: #555; font-size: 18px; flex-shrink: 0; }
+  .user-info { flex: 1; }
+  .user-name { font-size: 15px; font-weight: bold; }
+  .user-stats { font-size: 12px; color: #666; margin-top: 4px; }
+  .user-arrow { color: #555; font-size: 14px; }
+
+  .session-list { display: flex; flex-direction: column; gap: 10px; }
+  .session-item { background: #12121e; border: 1px solid #1e1e2e; border-radius: 10px; padding: 16px 20px; cursor: pointer; transition: border-color 0.2s; }
+  .session-item:hover { border-color: #00e5ff44; }
+  .session-row { display: flex; justify-content: space-between; align-items: center; }
+  .session-level { font-weight: bold; font-size: 14px; }
+  .session-result { font-size: 12px; padding: 3px 10px; border-radius: 6px; }
+  .r-victory { background: rgba(0,255,136,0.15); color: #00ff88; }
+  .r-defeat { background: rgba(255,51,102,0.15); color: #ff3366; }
+  .r-playing { background: rgba(0,229,255,0.15); color: #00e5ff; }
+  .session-meta { display: flex; gap: 16px; font-size: 12px; color: #666; margin-top: 8px; }
+  .session-vals { display: flex; gap: 16px; font-size: 12px; margin-top: 6px; }
+  .v-chaos { color: #00ff88; }
+  .v-pred { color: #ff6b6b; }
+
+  .chat-log { display: flex; flex-direction: column; gap: 10px; }
+  .chat-item { background: #12121e; border-radius: 10px; padding: 16px; border-left: 3px solid; }
+  .chat-user { border-left-color: #00e5ff; }
+  .chat-ai { border-left-color: #ff3366; }
+  .chat-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .chat-role { font-size: 12px; font-weight: bold; }
+  .chat-time { font-size: 11px; color: #555; }
+  .chat-user .chat-role { color: #00e5ff; }
+  .chat-ai .chat-role { color: #ff3366; }
+  .chat-content { font-size: 14px; line-height: 1.7; color: #ccc; word-break: break-all; white-space: pre-wrap; }
+  .chat-vals-line { font-size: 11px; color: #555; margin-top: 6px; }
+
+  .detail-meta { display: flex; gap: 20px; margin-bottom: 20px; font-size: 13px; color: #888; }
+
+  .loading { text-align: center; padding: 60px 0; color: #555; font-size: 14px; }
+  .empty { text-align: center; padding: 60px 0; color: #555; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>决战AI · 管理后台</h1>
+  <span class="status" id="statusBadge">未连接</span>
+</div>
+
+<div class="config-bar">
+  <label>云接入 URL：</label>
+  <input id="apiUrl" placeholder="粘贴云接入 URL，如 https://xxx.sh.run.tcloudbase.com/admin" />
+  <button onclick="connect()">连接</button>
+</div>
+
+<div class="container" id="app">
+  <div class="empty">请先填写云接入 URL 并点击连接</div>
+</div>
+
+<script>
+let API_URL = '/api';
+const $app = document.getElementById('app');
+const $url = document.getElementById('apiUrl');
+const $badge = document.getElementById('statusBadge');
+
+$url.value = '通过本地代理自动连接';
+$url.disabled = true;
+connect();
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function safeImageUrl(url) {
+  const str = String(url || '').trim();
+  if (/^https?:\/\//i.test(str) || /^data:image\//i.test(str)) return str;
+  return '';
+}
+
+async function apiFetch(action, data = {}) {
+  const params = new URLSearchParams({ action, ...data });
+  const res = await fetch(API_URL + '?' + params.toString());
+  return res.json();
+}
+
+async function connect() {
+  $badge.textContent = '连接中...';
+  $badge.className = 'status';
+  try {
+    const res = await apiFetch('overview');
+    if (res.success) {
+      $badge.textContent = '已连接';
+      $badge.className = 'status status-ok';
+      renderOverview(res);
+    } else {
+      throw new Error(res.error || '返回异常');
+    }
+  } catch (e) {
+    $badge.textContent = '连接失败';
+    $badge.className = 'status status-err';
+    $app.innerHTML = '<div class="empty">连接失败：' + esc(e.message) + '</div>';
+  }
+}
+
+function formatTime(d) {
+  if (!d) return '未知';
+  const date = new Date(d);
+  if (isNaN(date.getTime())) return '未知';
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const h = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return m + '-' + day + ' ' + h + ':' + min;
+}
+
+function formatDuration(s) {
+  if (!s) return '进行中';
+  if (s < 60) return s + '秒';
+  return Math.floor(s / 60) + '分' + (s % 60) + '秒';
+}
+
+function renderOverview(res) {
+  let html = '<div class="stats">';
+  html += '<div class="stat-card"><div class="stat-num">' + res.totalUsers + '</div><div class="stat-label">总用户数</div></div>';
+  html += '<div class="stat-card"><div class="stat-num">' + res.totalSessions + '</div><div class="stat-label">总对局数</div></div>';
+  html += '</div>';
+
+  html += '<div class="section-title">用户列表</div>';
+  if (!res.users || res.users.length === 0) {
+    html += '<div class="empty">暂无用户数据</div>';
+  } else {
+    html += '<div class="user-list">';
+    res.users.forEach(u => {
+      const avatarUrl = safeImageUrl(u.avatar);
+      const avatar = avatarUrl
+        ? '<img class="user-avatar" src="' + esc(avatarUrl) + '" />'
+        : '<div class="user-avatar-ph">?</div>';
+      html += '<div class="user-item" onclick="loadUser(\'' + esc(u.openid) + '\', \'' + esc(u.nickname || '') + '\')">';
+      html += avatar;
+      html += '<div class="user-info"><div class="user-name">' + esc(u.nickname || '匿名用户') + '</div>';
+      html += '<div class="user-stats">' + u.totalGames + '局 · ' + u.totalMessages + '条消息 · 胜' + u.victories + '次</div></div>';
+      html += '<div class="user-arrow">▶</div></div>';
+    });
+    html += '</div>';
+  }
+  $app.innerHTML = html;
+}
+
+async function loadUser(openid, nickname) {
+  $app.innerHTML = '<div class="loading">加载中...</div>';
+  try {
+    const res = await apiFetch('userSessions', { openid });
+    if (res.success) {
+      renderSessions(openid, nickname, res.sessions);
+    }
+  } catch (e) {
+    $app.innerHTML = '<div class="empty">加载失败：' + e.message + '</div>';
+  }
+}
+
+function renderSessions(openid, nickname, sessions) {
+  let html = '<div class="breadcrumb"><a onclick="connect()">总览</a> / ' + esc(nickname) + ' 的对局记录</div>';
+  html += '<div class="section-title">' + esc(nickname) + '（共 ' + sessions.length + ' 局）</div>';
+
+  if (sessions.length === 0) {
+    html += '<div class="empty">暂无对局记录</div>';
+  } else {
+    html += '<div class="session-list">';
+    sessions.forEach(s => {
+      const isVictory = s.result === 'victory' || s.result === 'victory_level1';
+      const resultCls = isVictory ? 'r-victory' : s.result === 'defeat' ? 'r-defeat' : 'r-playing';
+      const resultText = s.result === 'victory' ? '通关胜利' : s.result === 'victory_level1' ? '第一关通过' : s.result === 'defeat' ? '失败' : '进行中';
+      const msgCount = (typeof s.messageCount === 'number') ? s.messageCount : ((s.messages || []).length);
+
+      html += '<div class="session-item" onclick="loadSession(\'' + esc(s._id) + '\', \'' + esc(nickname || '') + '\', \'' + esc(openid) + '\')">';
+      html += '<div class="session-row"><span class="session-level">' + (s.levelName || '第一关') + '</span>';
+      html += '<span class="session-result ' + resultCls + '">' + resultText + '</span></div>';
+      html += '<div class="session-meta"><span>' + formatTime(s.startTime) + '</span>';
+      html += '<span>时长 ' + formatDuration(s.duration) + '</span>';
+      html += '<span>' + msgCount + '条对话</span></div>';
+      html += '<div class="session-vals"><span class="v-chaos">混沌 ' + (s.chaos || 0) + '%</span>';
+      html += '<span class="v-pred">预测 ' + (s.predictability || 0) + '%</span></div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  $app.innerHTML = html;
+}
+
+async function loadSession(sessionId, nickname, openid) {
+  $app.innerHTML = '<div class="loading">加载中...</div>';
+  try {
+    const res = await apiFetch('sessionDetail', { sessionId });
+    if (res.success) {
+      renderDetail(res.session, nickname, openid);
+    }
+  } catch (e) {
+    $app.innerHTML = '<div class="empty">加载失败：' + e.message + '</div>';
+  }
+}
+
+function renderDetail(session, nickname, openid) {
+  const resultText = session.result === 'victory' ? '通关胜利' : session.result === 'victory_level1' ? '第一关通过' : session.result === 'defeat' ? '失败' : '进行中';
+  let html = '<div class="breadcrumb"><a onclick="connect()">总览</a> / <a onclick="loadUser(\'' + esc(openid) + '\', \'' + esc(nickname || '') + '\')">' + esc(nickname) + '</a> / 对话详情</div>';
+
+  html += '<div class="section-title">' + (session.levelName || '第一关') + ' · 对话记录</div>';
+  html += '<div class="detail-meta"><span>结果：' + resultText + '</span>';
+  html += '<span>时长：' + formatDuration(session.duration) + '</span>';
+  html += '<span>混沌 ' + (session.chaos || 0) + '% · 预测 ' + (session.predictability || 0) + '%</span></div>';
+
+  const msgs = session.messages || [];
+  if (msgs.length === 0) {
+    html += '<div class="empty">无对话记录</div>';
+  } else {
+    html += '<div class="chat-log">';
+    msgs.forEach(m => {
+      const cls = m.role === 'user' ? 'chat-user' : 'chat-ai';
+      const label = m.role === 'user' ? '玩家' : 'AI';
+      const timeStr = m.timestamp ? formatTime(m.timestamp) : '';
+      html += '<div class="chat-item ' + cls + '">';
+      html += '<div class="chat-header"><span class="chat-role">' + label + '</span>';
+      if (timeStr) html += '<span class="chat-time">' + timeStr + '</span>';
+      html += '</div>';
+      html += '<div class="chat-content">' + esc(m.content || '') + '</div>';
+      html += '<div class="chat-vals-line">混沌 ' + (m.chaos || 0) + '% · 预测 ' + (m.predictability || 0) + '%</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+  $app.innerHTML = html;
+}
+</script>
+
+</body>
+</html>
